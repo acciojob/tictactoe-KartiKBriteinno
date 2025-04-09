@@ -1,21 +1,19 @@
-//your JS code here. If required.
 let currentPlayer = 'X';
 let player1 = '';
 let player2 = '';
 let board = Array(9).fill(null);
 let gameOver = false;
 
-document.addEventListener("DOMContentLoaded", function () {
-    const submitBtn = document.getElementById('submit');
-    submitBtn.addEventListener('click', startGame);
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById('submit').addEventListener('click', startGame);
 });
 
 function startGame() {
-    player1 = document.getElementById('player-1').value;
-    player2 = document.getElementById('player-2').value;
+    player1 = document.getElementById('player-1').value.trim();
+    player2 = document.getElementById('player-2').value.trim();
 
     if (!player1 || !player2) {
-        alert("Please enter both player names!");
+        alert("Please enter names for both players.");
         return;
     }
 
@@ -23,8 +21,8 @@ function startGame() {
     container.innerHTML = `
         <h1>Tic Tac Toe</h1>
         <div class="message">${player1}, you're up</div>
-        <div class="grid" id="board">
-            ${Array.from({ length: 9 }, (_, i) => `<div class="cell" id="${i + 1}"></div>`).join('')}
+        <div class="grid">
+            ${[...Array(9).keys()].map(i => `<div class="cell" id="${i + 1}"></div>`).join('')}
         </div>
     `;
 
@@ -34,17 +32,16 @@ function startGame() {
 }
 
 function handleMove(e) {
-    const id = parseInt(e.target.id) - 1;
+    const index = parseInt(e.target.id) - 1;
 
-    if (board[id] || gameOver) return;
+    if (board[index] || gameOver) return;
 
-    board[id] = currentPlayer;
+    board[index] = currentPlayer;
     e.target.textContent = currentPlayer;
 
     if (checkWinner()) {
-        const winner = currentPlayer === 'X' ? player1 : player2;
-        document.querySelector('.message').textContent = `${winner}, congratulations you won!`;
-        highlightWinningCells();
+        const winnerName = currentPlayer === 'X' ? player1 : player2;
+        document.querySelector('.message').textContent = `${winnerName}, congratulations you won!`;
         gameOver = true;
         return;
     }
@@ -61,14 +58,18 @@ function checkWinner() {
         [0,4,8],[2,4,6]
     ];
 
-    for (let combo of wins) {
-        const [a, b, c] = combo;
-        if (board[a] && board[a] === board[b] && board[b] === board[c]) {
-            document.querySelectorAll('.cell')[a].classList.add('winning');
-            document.querySelectorAll('.cell')[b].classList.add('winning');
-            document.querySelectorAll('.cell')[c].classList.add('winning');
+    for (const [a, b, c] of wins) {
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+            highlightCells([a, b, c]);
             return true;
         }
     }
+
     return false;
+}
+
+function highlightCells(indices) {
+    indices.forEach(i => {
+        document.getElementById((i + 1).toString()).classList.add('winning');
+    });
 }
